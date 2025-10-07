@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRUD ALUNOS - MOCK</title>
+    <style> 
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        margin: 20px auto;
+        padding: 0 10px;
+        max-width: 900px;
+      }
+      header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      form {
+        margin: 16px;
+        display: grid;
+        gap: 8px;
+        max-width: 500px;
+      }
+      input,button,select{
+        padding: 8px;
+        font-size: 14px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 12px;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+      .action-button {
+        margin-right: 4px;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>CRUD ALUNOS (MOCK)</h1>
+    </header>
+    <form id="alunoForm">
+
+      <input type="hidden" name="id"/>
+      nome: <br>
+      <input type="text" name="nome" placeholder="Digite o nome" /><br>
+      idade: <br>
+      <input type="number" name="idade" placeholder="Digite a idade" /><br>
+      email: <br>
+      <input type="text" name="email" placeholder="Digite o email" /><br>
+      curso: <br>
+      <input type="text" name="curso" placeholder="Digite o curso" /><br>
+      <div>
+      <button type="submit">Salvar</button>
+      <button type="button" id="btnNovo">Novo</button>
+    </div>
+    </form>
+    <section> 
+      <table id="tabela">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Nome</th>
+            <th>Idade</th>
+            <th>Email</th>
+            <th>Curso</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section> 
+    <script>
+      const API = 'HTTP://localhost:3001/alunos';
+      const form = document.getElementById('alunoForm');
+      const tbody = document.querySelector('#tabela tbody');
+      const btnNovo = document.getElementById('btnNovo');
+
+      async function lista() {
+        tbody.innerHTML = '';
+        const res = await fetch(API);
+        const alunos = await res.json();
+        alunos.forEach(aluno => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${aluno.id}</td>
+            <td>${aluno.nome}</td>
+            <td>${aluno.idade}</td>
+            <td>${aluno.email}</td>
+            <td>${aluno.curso}</td>
+            <td>
+              <button class="action-button" onclick="editar(${aluno.id})">Editar</button>
+              <button class="action-button" onclick="deletar(${aluno.id})">Deletar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        
+      }
+
+      lista();
+
+      // salvar dados ... criar (se não existe)
+      async function criar(dados) {
+        await fetch(API, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dados)
+        });
+      }
+      // atualizar dados ... se existe
+      async function atualizar(id, dados) {
+        await fetch(`${API}/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(dados)
+        });
+      }
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dados = {
+          nome: form.nome.value,
+          idade: Number(form.idade.value),
+          email: form.email.value,
+          curso: form.curso.value
+        };
+        if (form.id.value){
+          // await atualizar()
+        }
+        else{
+
+           await criar(dados);
+
+           form.reset();
+           lista();
+        }
+        
+      })
+    </script>
+   
+  </body>
+</html>
